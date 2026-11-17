@@ -85,6 +85,8 @@ const cases = [
   { name: '--quiet prints only the tail', args: ['--quiet', '--tail', '2', '--', node, job, 'chatty', '2'],
     code: 0, state: 'DONE:', says: 'chatty done', lacks: 'step 1\n' },
   { name: 'bad usage', args: ['--idle', 'soon', '--', 'x'], code: 2 },
+  { name: 'reports the longest silence', args: ['--idle', '0', '--', node, job, 'silent', '3'],
+    code: 0, state: 'DONE:', says: 'longest silence 3s' },
 ];
 for (const c of cases) await expectRun(c);
 

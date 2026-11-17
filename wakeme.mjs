@@ -72,7 +72,8 @@ exit codes:
   130 STOPPED  wakeme itself was interrupted; the job is killed
   2   bad usage
 
-The last line printed is always "WAKEME <name> <STATE>: <why> ...".
+The last line printed is always "WAKEME <name> <STATE>: <why> ...". Once the job
+has ended it also gives the longest silence seen: set the next --idle well above it.
 Files are in ~/.wakeme/ (or $WAKEME_HOME): <name>.log, <name>.json, <name>.exit.`;
 
 function die(msg) {
@@ -357,6 +358,7 @@ function watch(o, cmd) {
   const aux = new Set(); // helper processes (CPU sampler, check) to clean up on exit
   let finished = false;
   let lastOutput = watchStarted;
+  let longestSilence = 0; // the longest gap between two bits of output, to help pick --idle
   let goneSince = 0;
   const chunk = Buffer.alloc(65536);
   const samples = []; // {t, cpu} taken during the current silence
@@ -377,7 +379,12 @@ function watch(o, cmd) {
       grew = true;
       if (!o.quiet) process.stdout.write(chunk.subarray(0, n));
     }
-    if (grew) { lastOutput = Date.now(); samples.length = 0; }
+    if (grew) {
+      const now = Date.now();
+      longestSilence = Math.max(longestSilence, now - lastOutput);
+      lastOutput = now;
+      samples.length = 0;
+    }
   };
 
   const finish = async (state, why, code, jobAlive) => {
@@ -392,9 +399,12 @@ function watch(o, cmd) {
       else tail = ` · still running, pid ${pid} (wakeme --attach ${name} to keep watching, --stop ${name} to kill)`;
     }
     pump();
-    writeStatus({ state, why, exit_code: code, ended: new Date().toISOString(), still_running: Boolean(jobAlive) && !killed });
+    writeStatus({ state, why, exit_code: code, ended: new Date().toISOString(), still_running: Boolean(jobAlive) && !killed,
+      longest_silence_s: Math.round(longestSilence / 1000) });
+    // Once a job has ended, its longest silence is the number to base the next --idle on.
+    const quietest = jobAlive ? '' : ` · longest silence ${fmt(longestSilence)}`;
     const shown = o.quiet ? lastLines(f.log, o.tail) : '';
-    const line = `${shown ? `${shown}\n` : ''}\nWAKEME ${name} ${state}: ${why} · ran ${fmt(Date.now() - jobStarted)}${tail} · log ${f.log}\n`;
+    const line = `${shown ? `${shown}\n` : ''}\nWAKEME ${name} ${state}: ${why} · ran ${fmt(Date.now() - jobStarted)}${quietest}${tail} · log ${f.log}\n`;
     process.stdout.write(line, () => process.exit(code));
     setTimeout(() => process.exit(code), 2000).unref(); // if stdout is gone the callback may never run
   };

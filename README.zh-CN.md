@@ -22,6 +22,8 @@ wakeme --idle 10m -- wsl -e bash -lc "uv run pytest"
 3. 后台命令退出时，读它的最后一行和退出码（见下表）。
 4. 如果报 `STALLED` 而任务其实没问题，用 `wakeme --attach <名字> --idle <更长的时间>` 作为新的后台命令继续等。如果真的卡死了，用 `wakeme --stop <名字>`。
 
+**`--idle` 怎么设：** 任务结束时，最后一行还会带上 `longest silence <时长>`，即这次运行里最长的一段静默（`<名字>.json` 里的 `longest_silence_s` 也有）。先跑一次，再把 `--idle` 设成明显大于它的值，比如它的两三倍。
+
 ## 怎么判断卡死
 
 只看"没输出"不可靠：编译器或下载可以很久不出声但完全正常。所以 `wakeme` 用两个信号。

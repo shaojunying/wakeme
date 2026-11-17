@@ -22,6 +22,8 @@ One file, no dependencies, Node 18+. Tested on Windows and Linux.
 3. When the background command exits, read its last line and exit code (table below).
 4. If it says `STALLED` and the job is in fact fine, run `wakeme --attach <name> --idle <longer>` as a new background command. If the job is really stuck, `wakeme --stop <name>`.
 
+**Picking `--idle`:** when a job ends, the last line also says `longest silence <D>`, the longest quiet stretch of that run (it is in `<name>.json` as `longest_silence_s` too). Run a job once, then set `--idle` comfortably above that, for example two or three times it.
+
 ## What counts as a hang
 
 Silence alone is a poor signal: a compiler or a download can be quiet for a long time and be perfectly healthy. So `wakeme` uses two signals.
