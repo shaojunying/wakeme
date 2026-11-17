@@ -6,6 +6,10 @@ Run a long command and get woken when it needs attention: when it finishes, fail
 
 It is made for AI coding agents such as Claude Code. An agent that starts a long job as a background command is only woken when that command exits. A job that hangs never exits, so the agent waits forever. `wakeme` wraps the job and turns every outcome, including a hang, into an exit with a clear last line and exit code.
 
+![A training script prints two epochs and then hangs. After 5 seconds without output and with the CPU idle, wakeme exits with code 125 and says STALLED, which wakes the waiting agent. The job is still running, and wakeme --stop kills it.](docs/demo.gif)
+
+<sub>A real run, replayed at its recorded timing (`--idle 5s` to keep it short).</sub>
+
 ```sh
 wakeme --idle 10m -- npm run build
 wakeme --idle 15m --expect out/model.bin -- "python train.py"

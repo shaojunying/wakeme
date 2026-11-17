@@ -1,0 +1,51 @@
+[
+ {
+  "cmd": "wakeme --name train --idle 5s -- python3 train.py",
+  "out": [
+   [
+    0.05,
+    "wakeme: train started, pid 451123, idle 5s, log /tmp/wakeme/train.log\n"
+   ],
+   [
+    1.05,
+    "epoch 1/3  loss 0.912\n"
+   ],
+   [
+    2.05,
+    "epoch 2/3  loss 0.537\n"
+   ],
+   [
+    7.08,
+    "\n"
+   ],
+   [
+    7.08,
+    "WAKEME train STALLED: no output for 5s, CPU idle \u00b7 ran 7s \u00b7 still running, pid 451123 (wakeme --attach train to keep watching, --stop train to kill) \u00b7 log /tmp/wakeme/train.log\n"
+   ]
+  ],
+  "code": 125,
+  "secs": 7.08
+ },
+ {
+  "cmd": "echo $?",
+  "out": [
+   [
+    0.05,
+    "125\n"
+   ]
+  ],
+  "code": 0,
+  "secs": 0.1
+ },
+ {
+  "cmd": "wakeme --stop train",
+  "out": [
+   [
+    0.25,
+    "WAKEME train STOPPED: killed pid 451123 and its children\n"
+   ]
+  ],
+  "code": 0,
+  "secs": 0.25
+ }
+]

@@ -6,6 +6,10 @@
 
 它是给 Claude Code 这类 AI 编程 agent 用的。agent 把长任务作为后台命令启动后，只有这条命令退出时才会被唤醒。任务卡死时命令永远不退出，agent 就一直等下去。`wakeme` 把任务包一层，把每一种结局（包括卡死）都变成一次退出，并给出明确的最后一行和退出码。
 
+![一个训练脚本打印两轮后卡住。没有输出且 CPU 空闲 5 秒后，wakeme 以退出码 125 退出并报 STALLED，等待中的 agent 被叫醒。任务仍在运行，用 wakeme --stop 停掉。](docs/demo.gif)
+
+<sub>真实运行的录制，按记录的时间回放（为了短一些用了 `--idle 5s`）。</sub>
+
 ```sh
 wakeme --idle 10m -- npm run build
 wakeme --idle 15m --expect out/model.bin -- "python train.py"
