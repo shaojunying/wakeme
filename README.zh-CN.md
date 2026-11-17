@@ -15,6 +15,15 @@ wakeme --idle 10m -- wsl -e bash -lc "uv run pytest"
 
 单文件，零依赖，Node 18+。在 Windows 和 Linux 上测试过。
 
+## 安装
+
+```sh
+npm link                                        # 在本目录执行，把 `wakeme` 放到 PATH 上
+ln -s "$PWD/wakeme.mjs" ~/.local/bin/wakeme     # Linux / WSL 也可以这样
+```
+
+命令前的 `--` 可以省略：PowerShell 调用 `wakeme.ps1` 这类脚本时会把 `--` 吞掉，所以 `wakeme` 会把第一个不是自己选项的参数当作命令的开头。命令本身以 `-` 开头时要保留 `--`。
+
 ## 给 AI agent 的用法
 
 1. 用 `wakeme ... -- <命令>` 作为**后台命令**启动任务。`--idle` 设成健康运行时可能出现的最长静默时间；知道"健康的结果长什么样"时加上 `--expect` 或 `--check`。

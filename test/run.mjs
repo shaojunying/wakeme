@@ -85,6 +85,11 @@ const cases = [
   { name: '--quiet prints only the tail', args: ['--quiet', '--tail', '2', '--', node, job, 'chatty', '2'],
     code: 0, state: 'DONE:', says: 'chatty done', lacks: 'step 1\n' },
   { name: 'bad usage', args: ['--idle', 'soon', '--', 'x'], code: 2 },
+  { name: 'works without "--" (PowerShell drops it)', args: ['--idle', '0', node, job, 'chatty', '1'], code: 0, state: 'DONE:' },
+  { name: 'options after the command belong to the command',
+    args: [node, '-e', "console.log('got:' + process.argv.slice(1).join(','))", '--', '--help', '--idle'],
+    code: 0, state: 'DONE:', says: 'got:--help,--idle', lacks: 'usage: wakeme' },
+  { name: 'no command at all', args: ['--idle', '1m'], code: 2, says: 'no command given' },
   { name: 'reports the longest silence', args: ['--idle', '0', '--', node, job, 'silent', '3'],
     code: 0, state: 'DONE:', says: 'longest silence 3s' },
 ];

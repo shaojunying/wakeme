@@ -15,6 +15,15 @@ wakeme --idle 10m -- wsl -e bash -lc "uv run pytest"
 
 One file, no dependencies, Node 18+. Tested on Windows and Linux.
 
+## Install
+
+```sh
+npm link                                        # in this folder: puts `wakeme` on PATH
+ln -s "$PWD/wakeme.mjs" ~/.local/bin/wakeme     # or this, on Linux / WSL
+```
+
+`--` before the command is optional: PowerShell drops it when it calls the `wakeme.ps1` shim, so `wakeme` treats the first argument that is not one of its options as the start of the command. Keep the `--` when the command itself starts with `-`.
+
 ## For AI agents
 
 1. Start the job with `wakeme ... -- <command>` as a **background command**. Set `--idle` to the longest silence a healthy run can have, and add `--expect` or `--check` when you know what a healthy run looks like.

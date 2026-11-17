@@ -26,7 +26,7 @@ const files = (name) => ({
   exit: path.join(HOME, `${name}.exit`),
 });
 
-const HELP = `usage: wakeme [options] -- <command>     start a job and watch it
+const HELP = `usage: wakeme [options] [--] <command>  start a job and watch it
        wakeme --attach NAME [options]    watch a job that is already running
        wakeme --stop NAME                kill a job and its children
        wakeme --list                     show the jobs wakeme knows about
@@ -98,10 +98,21 @@ function fmt(ms) {
 function parseArgs(argv) {
   const o = { idle: 600000, idleBusy: null, cpu: true, timeout: 0, check: null, checkEvery: 300000,
     expect: [], kill: false, name: null, shell: null, quiet: false, tail: 20, attach: null, stop: null, list: false };
-  if (argv.includes('--help') || argv.includes('-h')) { console.log(HELP); process.exit(0); }
-  const split = argv.indexOf('--');
-  const flags = split < 0 ? argv : argv.slice(0, split);
-  const cmd = split < 0 ? [] : argv.slice(split + 1);
+  // The command starts after "--", or at the first argument that is not an option.
+  // "--" has to be optional: PowerShell drops it when it calls a script, such as
+  // the wakeme.ps1 shim that npm installs.
+  const TAKES_VALUE = new Set(['--idle', '--idle-busy', '--timeout', '--check', '--check-every', '--expect',
+    '--name', '--attach', '--stop', '--shell', '--tail']);
+  const flags = [];
+  let cmd = [];
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === '--') { cmd = argv.slice(i + 1); break; }
+    if (!a.startsWith('-')) { cmd = argv.slice(i); break; }
+    flags.push(a);
+    if (TAKES_VALUE.has(a) && i + 1 < argv.length) flags.push(argv[++i]);
+  }
+  if (flags.includes('--help') || flags.includes('-h')) { console.log(HELP); process.exit(0); }
   for (let i = 0; i < flags.length; i++) {
     const f = flags[i];
     const val = () => (i + 1 < flags.length ? flags[++i] : die(`${f} needs a value`));
@@ -120,7 +131,7 @@ function parseArgs(argv) {
     else if (f === '--shell') o.shell = val();
     else if (f === '--quiet') o.quiet = true;
     else if (f === '--tail') { o.tail = Number(val()); if (!Number.isInteger(o.tail) || o.tail < 0) die('--tail needs a whole number'); }
-    else die(split < 0 && !f.startsWith('--') ? 'missing "--" before the command' : `unknown option ${f}`);
+    else die(`unknown option ${f}`);
   }
   const existing = o.attach || o.stop;
   if (existing || o.list) {
@@ -128,8 +139,7 @@ function parseArgs(argv) {
     if (o.name) die('the job is already named; drop --name');
     o.name = existing;
   } else {
-    if (split < 0) die('missing "--" before the command');
-    if (!cmd.length) die('no command after "--"');
+    if (!cmd.length) die('no command given; put it after the options (and after "--" if it starts with "-")');
   }
   if (o.idleBusy === null) o.idleBusy = o.idle * 6;
   if (o.idleBusy < o.idle) die('--idle-busy must not be shorter than --idle');
